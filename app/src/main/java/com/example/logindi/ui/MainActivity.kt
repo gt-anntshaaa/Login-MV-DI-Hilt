@@ -2,11 +2,15 @@ package com.example.logindi.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import com.example.logindi.R
 import com.example.logindi.data.User
 import com.example.logindi.databinding.ActivityMainBinding
+import com.example.logindi.util.UiState
+import com.example.logindi.util.hide
+import com.example.logindi.util.show
+import com.example.logindi.util.toast
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,10 +27,20 @@ class MainActivity : AppCompatActivity() {
             val username = binding.etUserName.text.toString()
             val password = binding.etPassword.text.toString()
 
-            if (viewModel.isLoginValid(User(username,password))){
-                Toast.makeText(this, "login succes", Toast.LENGTH_SHORT).show()
-            }else{
-                Toast.makeText(this, "login gagal", Toast.LENGTH_SHORT).show()
+            viewModel.Login(User(username,password))
+        }
+
+        viewModel.login.observe(this){
+            when(it){
+                is UiState.Loading -> {binding.progressBar.show()}
+                is UiState.Success -> {
+                    binding.progressBar.hide()
+                    val user = it.values.first
+                    toast("${it.values.second}")
+                }
+                is UiState.Failure -> {
+                    toast("${it.error}")
+                }
             }
         }
     }
